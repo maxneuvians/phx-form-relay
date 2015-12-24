@@ -1,0 +1,15 @@
+%h2 
+  Listing trapped emails for #{@form.name}
+%table.table
+  %thead
+    %tr
+      %th Content
+      %th IP
+      %th Date sent
+  %tbody
+    - for email <- @emails do
+      %tr
+        %td
+          %code= email.content
+        %td= email.ip
+        %td= email.inserted_at

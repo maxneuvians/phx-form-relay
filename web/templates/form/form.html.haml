@@ -1,0 +1,30 @@
+= form_for @changeset, @action, fn f ->
+  - if @changeset.action do
+    .alert.alert-danger
+      %p Oops, something went wrong! Please check the errors below:
+      %ul
+        - for {attr, message} <- f.errors do
+          %li
+            = humanize(attr)
+            &nbsp;
+            = message
+
+  .form-group
+    = label f, :name, "Name", class: "control-label"
+    = text_input f, :name, class: "form-control"
+  .form-group
+    = label f, :to, "To", class: "control-label"
+    = textarea f, :to, class: "form-control"
+  .form-group
+    = label f, :honeypot, "Honeypot", class: "control-label"
+    = text_input f, :honeypot, class: "form-control"
+  .form-group
+    = label f, :redirect_to, "Redirect to", class: "control-label"
+    = text_input f, :redirect_to, class: "form-control"
+  .form-group
+    = label f, :active, "Active", class: "control-label"
+    %br
+    = checkbox f, :active, class: ""
+  .form-group
+    = submit "Submit", class: "btn btn-primary"
+= end

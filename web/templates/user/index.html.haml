@@ -1,0 +1,17 @@
+%h2 Listing users
+%table.table
+  %thead
+    %tr
+      %th Email
+      %th Created
+      %th Updated
+      %th Delete
+  %tbody
+    - for user <- @users do
+      %tr
+        %td= link user.email, to: user_path(@conn, :edit, user)
+        %td= user.inserted_at
+        %td= user.updated_at
+        %td= link "Delete", to: user_path(@conn, :delete, user), method: :delete, data: [confirm: "Are you sure?"]
+
+= link "New user", to: user_path(@conn, :new), class: "btn btn-primary"

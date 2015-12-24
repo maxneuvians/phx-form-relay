@@ -1,0 +1,27 @@
+!!!
+%html{lang: "en"}
+  %head
+    %meta{charset: "utf-8"}
+    %meta{content: "IE=edge", "http-equiv": "X-UA-Compatible"}
+    %meta{content: "width=device-width, initial-scale=1", name: "viewport"}
+    %meta{content: "", name: "description"}
+    %meta{content: "", name: "author"}
+    %title PHX Form Replay
+    - css_path = static_path(@conn, "/css/app.css")
+    %link{href: "#{css_path}", rel: "stylesheet"}
+  %body
+    .container{role: "main"}
+      - if @conn.assigns[:current_user] do
+        .header
+          %ul.nav.nav-pills.pull-right
+            %li= link "Forms", to: form_path(@conn, :index)
+            %li= link "Users", to: user_path(@conn, :index)
+            %li= link "Log out", to: session_path(@conn, :delete)
+      .row
+        .col-xs-12
+          %p.alert.alert-info{role: "alert"}= get_flash(@conn, :info)
+          %p.alert.alert-danger{role: "alert"}= get_flash(@conn, :error)
+      = render @view_module, @view_template, assigns
+    / /container
+    - js_path = static_path(@conn, "/js/app.js")
+    %script{src: "#{js_path}"}

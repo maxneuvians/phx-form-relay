@@ -1,0 +1,25 @@
+%h2 Listing forms
+%table.table
+  %thead
+    %tr
+      %th Name
+      %th Link
+      %th To
+      %th Honeypot
+      %th Redirect to
+      %th Active
+      %th Trapped
+      %th Delete
+  %tbody
+    - for form <- @forms do
+      %tr
+        %td= link form.name, to: form_path(@conn, :edit, form)
+        %td= "send/#{form.id}"
+        %td= form.to
+        %td= form.honeypot
+        %td= form.redirect_to
+        %td= humanize form.active
+        %td= link "#{form.count}", to: form_email_path(@conn, :index, form)
+        %td= link "Delete", to: form_path(@conn, :delete, form), method: :delete, data: [confirm: "Are you sure?"]
+
+= link "New form", to: form_path(@conn, :new), class: "btn btn-primary"
