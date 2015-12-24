@@ -15,8 +15,8 @@ defmodule PhxFormRelay.Mailer do
               password: Application.get_env(:phx_form_relay, :smtp_password),
               relay: Application.get_env(:phx_form_relay, :smtp_host),
               port: Application.get_env(:phx_form_relay, :smtp_port),
-              tls: :never,
-              auth: :never
+              tls: :always,
+              auth: :always
             }
         }
       end
