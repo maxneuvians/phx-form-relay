@@ -27,14 +27,14 @@ defmodule PhxFormRelay.Mailer do
       {
         subject: "You have received a new form request for: #{form.name}",
         from: Application.get_env(:phx_form_relay, :from_email),
-        reply_to: Application.get_env(:phx_form_relay, :from_email),
+        reply_to: reply_to(form.reply_to),
         to: parse_emails(form.to),
         text: format_params(form, params)
       }
   end
 
   def format_params(form, params) do
-    Enum.filter(params, fn {k, v} -> k != "phx_form_id" and k != form.honeypot end)
+    Enum.filter(params, fn {k, _} -> k != "phx_form_id" and k != form.honeypot end)
       |> Enum.map(fn {k, v} -> {k, "#{k}: #{v}"} end) 
       |> Dict.values 
       |> Enum.join "\n"
@@ -43,4 +43,7 @@ defmodule PhxFormRelay.Mailer do
   defp parse_emails(emails) do 
     String.split(emails, ",") |> Enum.map(fn(e) -> String.strip(e) end)
   end
+
+  defp reply_to(nil), do: Application.get_env(:phx_form_relay, :from_email)
+  defp reply_to(email), do: email
 end

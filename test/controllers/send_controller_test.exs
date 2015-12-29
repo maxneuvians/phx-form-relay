@@ -6,7 +6,7 @@ defmodule PhxFormRelay.SendControllerTest do
 
   @bot_attrs %{trigger_me: "yes"}
   @normal_attrs %{trigger_me: "", content: "Here is some content for you"}
-  @form_attrs %{active: true, honeypot: "trigger_me", name: "some name", redirect_to: "http://google.com", to: "max@neuvians.io"}
+  @form_attrs %{active: true, honeypot: "trigger_me", name: "some name", redirect_to: "http://google.com", to: "max@neuvians.io", reply_to: "max@neuvians.net"}
 
   setup_all do 
     Mailman.TestServer.start
@@ -16,7 +16,8 @@ defmodule PhxFormRelay.SendControllerTest do
   setup do
     form = Repo.insert! Form.changeset(%Form{}, @form_attrs)
     inactive_form = Repo.insert! Form.changeset(%Form{}, %{@form_attrs | active: false})
-    {:ok, conn: conn, form: form, inactive_form: inactive_form}
+    no_reply_to_form = Repo.insert! Form.changeset(%Form{}, %{@form_attrs | reply_to: nil})
+    {:ok, conn: conn, form: form, inactive_form: inactive_form, no_reply_to_form: no_reply_to_form}
   end
 
   test "shows a not found page if the form does not exist", %{conn: conn} do
@@ -40,7 +41,7 @@ defmodule PhxFormRelay.SendControllerTest do
     assert redirected_to(conn) == form.redirect_to
   end
 
-  test "logs the email bodu if the honeypot it triggered", %{conn: conn, form: form} do
+  test "logs the email body if the honeypot it triggered", %{conn: conn, form: form} do
     conn = post conn, "send/#{form.id}", @bot_attrs
     assert Repo.one!(Email)
     assert redirected_to(conn) == form.redirect_to
@@ -53,8 +54,24 @@ defmodule PhxFormRelay.SendControllerTest do
   end
 
   test "it sends an email if the honeypot it empty", %{conn: conn, form: form} do
+    Mailman.TestServer.clear_deliveries
+    post conn, "send/#{form.id}", @normal_attrs 
+    :timer.sleep(100) # Allow for the Mail process to complete
+    assert Mailman.TestServer.deliveries |> Enum.count == 1
+  end
+
+  test "sets the reply-to field based on the reply_to attribute", %{conn: conn, form: form} do
+    Mailman.TestServer.clear_deliveries
     post conn, "send/#{form.id}", @normal_attrs
-    assert Mailman.TestServer.deliveries() |> length > 0
+    :timer.sleep(100) # Allow for the Mail process to complete
+    assert Mailman.TestServer.deliveries |> List.first |> String.contains? "reply-to: #{form.reply_to}"
+  end
+
+  test "sets the reply-to field based on the sender field if reply_to does not exist attribute", %{conn: conn, no_reply_to_form: no_reply_to_form} do
+    Mailman.TestServer.clear_deliveries
+    post(conn, "send/#{no_reply_to_form.id}", @normal_attrs)
+    :timer.sleep(100) # Allow for the Mail process to complete
+    assert Mailman.TestServer.deliveries |> List.first |> String.contains? "reply-to: #{Application.get_env(:phx_form_relay, :from_email)}"
   end
 
 end
