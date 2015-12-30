@@ -21,4 +21,6 @@ config :phx_form_relay,
   smtp_password: System.get_env("MAILGUN_SMTP_PASSWORD"),
   smtp_host: System.get_env("MAILGUN_SMTP_SERVER"),
   smtp_port: System.get_env("MAILGUN_SMTP_PORT"),
-  from_email: System.get_env("SENDER_EMAIL")
+  from_email: System.get_env("SENDER_EMAIL"),
+  smtp_tls: :always,
+  smtp_auth: :always

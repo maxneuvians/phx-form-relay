@@ -47,4 +47,6 @@ config :phx_form_relay,
   smtp_password: '',
   smtp_host: 'localhost',
   smtp_port: 1025,
+  smtp_tls: :never,
+  smtp_auth: :never,
   from_email: 'test@test.com'

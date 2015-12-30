@@ -1,7 +1,7 @@
 defmodule PhxFormRelay.Mailer do
   
   def deliver(email) do
-    Mailman.deliver(email, config)
+    Mailman.deliver(email, config, :send_cc_and_bcc)
   end
 
   def config do
@@ -15,8 +15,8 @@ defmodule PhxFormRelay.Mailer do
               password: Application.get_env(:phx_form_relay, :smtp_password),
               relay: Application.get_env(:phx_form_relay, :smtp_host),
               port: Application.get_env(:phx_form_relay, :smtp_port),
-              tls: :always,
-              auth: :always
+              tls: Application.get_env(:phx_form_relay, :smtp_tls),
+              auth: Application.get_env(:phx_form_relay, :smtp_auth)
             }
         }
       end
@@ -29,6 +29,8 @@ defmodule PhxFormRelay.Mailer do
         from: Application.get_env(:phx_form_relay, :from_email),
         reply_to: reply_to(form.reply_to),
         to: parse_emails(form.to),
+        cc: parse_emails(form.cc), 
+        bcc: parse_emails(form.bcc),
         text: format_params(form, params)
       }
   end
@@ -40,6 +42,7 @@ defmodule PhxFormRelay.Mailer do
       |> Enum.join "\n"
   end
 
+  defp parse_emails(nil), do: []
   defp parse_emails(emails) do 
     String.split(emails, ",") |> Enum.map(fn(e) -> String.strip(e) end)
   end

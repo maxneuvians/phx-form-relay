@@ -38,7 +38,7 @@ defmodule PhxFormRelay.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:comeonin, "~> 1.2"},
       {:cowboy, "~> 1.0"},
-      {:mailman, github: "kamilc/mailman"},
+      {:mailman, github: "maxneuvians/mailman", ref: "send-to-cc-and-bcc"},
       {:mock, "~> 0.1.1", only: :test}
     ]
   end

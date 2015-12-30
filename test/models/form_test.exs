@@ -3,7 +3,7 @@ defmodule PhxFormRelay.FormTest do
 
   alias PhxFormRelay.Form
 
-  @valid_attrs %{active: true, count: 42, honeypot: "some content", name: "some name", redirect_to: "some content", to: "some content"}
+  @valid_attrs %{active: true, count: 42, honeypot: "some content", name: "some name", redirect_to: "some content", to: "some content", bcc: "", cc: ""}
   @invalid_attrs %{}
 
   test "changeset with valid attributes" do
