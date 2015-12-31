@@ -12,7 +12,7 @@ Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
 ### ToDo
 - [X] Properly CC and BCC
-- [ ] Handle file submissions in a form
+- [X] Handle file submissions in a form
 - [ ] Customize email title
 
 ### Version
