@@ -17,7 +17,7 @@ defmodule PhxFormRelay.UserController do
   end
 
   def create(conn, %{"user" => user_params}) do
-    changeset = User.changeset(%User{}, user_params) |> Password.generate_password_in_changeset
+    changeset = %User{} |> User.changeset(user_params) |> Password.generate_password_in_changeset
 
     case Repo.insert(changeset) do
       {:ok, _user} ->
@@ -37,7 +37,7 @@ defmodule PhxFormRelay.UserController do
 
   def update(conn, %{"id" => id, "user" => user_params}) do
     user = Repo.get!(User, id)
-    changeset = User.changeset(user, user_params) |> Password.generate_password_in_changeset
+    changeset = user |> User.changeset(user_params) |> Password.generate_password_in_changeset
 
     case Repo.update(changeset) do
       {:ok, user} ->

@@ -31,21 +31,28 @@ defmodule PhxFormRelay.Mailer do
         to: parse_emails(form.to),
         cc: parse_emails(form.cc), 
         bcc: parse_emails(form.bcc),
-        text: format_params(form, params)
+        text: format_params(form, params),
+        attachments: params |> Enum.map(fn {_, v} -> add_attachment(v) end) |> Enum.filter(fn e -> e != nil end)
       }
   end
 
-  def format_params(form, params) do
-    Enum.filter(params, fn {k, _} -> k != "phx_form_id" and k != form.honeypot end)
-      |> Enum.map(fn {k, v} -> {k, "#{k}: #{v}"} end) 
-      |> Dict.values 
+  def format_params(form, params) do 
+    params |> Enum.filter(fn {k, _} -> k != "phx_form_id" and k != form.honeypot end)
+      |> Enum.map(fn i -> join_map_items(i) end) 
+      |> Enum.filter(fn e -> e != nil end)
       |> Enum.join "\n"
   end
+  
+  defp add_attachment(%Plug.Upload{} = file), do: Mailman.Attachment.inline!(file.path, file.filename)
+  defp add_attachment(_), do: nil
+
+  defp join_map_items({_, %Plug.Upload{}}), do: nil
+  defp join_map_items({k, v}) when is_map(v), do: "#{k}: -> #{Enum.map(v, fn i -> join_map_items(i) end)} "
+  defp join_map_items({k, v}) when is_list(v), do: "#{k}: #{Enum.join(v, ", ")} "
+  defp join_map_items({k, v}), do: "#{k}: #{v} "
 
   defp parse_emails(nil), do: []
-  defp parse_emails(emails) do 
-    String.split(emails, ",") |> Enum.map(fn(e) -> String.strip(e) end)
-  end
+  defp parse_emails(emails), do: emails |> String.split(",") |> Enum.map(fn(e) -> String.strip(e) end)
 
   defp reply_to(nil), do: Application.get_env(:phx_form_relay, :from_email)
   defp reply_to(email), do: email

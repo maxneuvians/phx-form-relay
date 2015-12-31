@@ -17,7 +17,7 @@ defmodule PhxFormRelay.SessionController do
   end
 
   def delete(conn, _) do
-    delete_session(conn, :current_user)
+    conn |> delete_session(:current_user)
       |> put_flash(:info, 'You have been logged out')
       |> redirect(to: session_path(conn, :index))
   end

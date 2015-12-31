@@ -9,7 +9,10 @@ defmodule PhxFormRelay.Mixfile do
      compilers: [:phoenix] ++ Mix.compilers,
      build_embedded: Mix.env == :prod,
      start_permanent: Mix.env == :prod,
-     deps: deps]
+     deps: deps,
+     test_coverage: [tool: ExCoveralls],
+     preferred_cli_env: ["coveralls": :test, "coveralls.detail": :test, "coveralls.post": :test]
+    ]
   end
 
   # Configuration for the OTP application
@@ -38,6 +41,8 @@ defmodule PhxFormRelay.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:comeonin, "~> 1.2"},
       {:cowboy, "~> 1.0"},
+      {:dogma, "~> 0.0", only: :dev},
+      {:excoveralls, "~> 0.4", only: :test},
       {:mailman, github: "maxneuvians/mailman", ref: "send-to-cc-and-bcc"},
       {:mock, "~> 0.1.1", only: :test}
     ]
