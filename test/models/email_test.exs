@@ -3,7 +3,7 @@ defmodule PhxFormRelay.EmailTest do
 
   alias PhxFormRelay.Email
 
-  @valid_attrs %{content: "some content", ip: "some content"}
+  @valid_attrs %{content: "some content", ip: "some content", form_id: "b7d4ad5f-cbdf-4b0f-bf61-bf3144958892"}
   @invalid_attrs %{}
 
   test "changeset with valid attributes" do

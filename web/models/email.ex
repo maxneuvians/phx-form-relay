@@ -11,7 +11,7 @@ defmodule PhxFormRelay.Email do
     timestamps
   end
 
-  @required_fields ~w(content ip)
+  @required_fields ~w(form_id content ip)
   @optional_fields ~w()
 
   @doc """

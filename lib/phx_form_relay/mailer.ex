@@ -1,7 +1,7 @@
 defmodule PhxFormRelay.Mailer do
   
   def deliver(email) do
-    Mailman.deliver(email, config, :send_cc_and_bcc)
+    email |> Mailman.deliver(config, :send_cc_and_bcc)
   end
 
   def config do
@@ -27,11 +27,11 @@ defmodule PhxFormRelay.Mailer do
       {
         subject: "You have received a new form request for: #{form.name}",
         from: Application.get_env(:phx_form_relay, :from_email),
-        reply_to: reply_to(form.reply_to),
-        to: parse_emails(form.to),
-        cc: parse_emails(form.cc), 
-        bcc: parse_emails(form.bcc),
-        text: format_params(form, params),
+        reply_to: form.reply_to |> reply_to,
+        to: form.to |> parse_emails,
+        cc: form.cc |> parse_emails,
+        bcc: form.bcc |> parse_emails,
+        text: form |> format_params(params),
         attachments: params |> Enum.map(fn {_, v} -> add_attachment(v) end) |> Enum.filter(fn e -> e != nil end)
       }
   end
@@ -40,20 +40,22 @@ defmodule PhxFormRelay.Mailer do
     params |> Enum.filter(fn {k, _} -> k != "phx_form_id" and k != form.honeypot end)
       |> Enum.map(fn i -> join_map_items(i) end) 
       |> Enum.filter(fn e -> e != nil end)
-      |> Enum.join "\n"
+      |> Enum.join("\n")
   end
   
   defp add_attachment(%Plug.Upload{} = file), do: Mailman.Attachment.inline!(file.path, file.filename)
   defp add_attachment(_), do: nil
 
-  defp join_map_items({_, %Plug.Upload{}}), do: nil
-  defp join_map_items({k, v}) when is_map(v), do: "#{k}: -> #{Enum.map(v, fn i -> join_map_items(i) end)} "
-  defp join_map_items({k, v}) when is_list(v), do: "#{k}: #{Enum.join(v, ", ")} "
+  defp join_map_items({k, %Plug.Upload{} = file}), do: "#{k}: See attached #{file.filename}"
+  defp join_map_items({k, v}) when is_map(v), do: "#{k}: -> #{v |> Enum.map(fn i -> join_map_items(i) end)} "
+  defp join_map_items({k, v}) when is_list(v), do: "#{k}: #{v |> Enum.join(", ")} "
   defp join_map_items({k, v}), do: "#{k}: #{v} "
 
   defp parse_emails(nil), do: []
+  defp parse_emails(""), do: []
   defp parse_emails(emails), do: emails |> String.split(",") |> Enum.map(fn(e) -> String.strip(e) end)
 
   defp reply_to(nil), do: Application.get_env(:phx_form_relay, :from_email)
+  defp reply_to(""), do: Application.get_env(:phx_form_relay, :from_email)
   defp reply_to(email), do: email
 end

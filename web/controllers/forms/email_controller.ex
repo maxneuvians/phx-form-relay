@@ -5,8 +5,8 @@ defmodule PhxFormRelay.EmailController do
   alias PhxFormRelay.Form
 
   def index(conn, params) do
-    emails = Repo.all(Email)
     form = Repo.get!(Form, params["form_id"])
+    emails = Repo.all(assoc(form, :emails))
     render(conn, "index.html", emails: emails, form: form)
   end
 end

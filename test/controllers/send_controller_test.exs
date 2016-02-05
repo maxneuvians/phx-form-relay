@@ -1,15 +1,15 @@
 defmodule PhxFormRelay.SendControllerTest do
   use PhxFormRelay.ConnCase
 
-  alias PhxFormRelay.Email
   alias PhxFormRelay.Form
 
   @bot_attrs %{trigger_me: "yes"}
   @normal_attrs %{trigger_me: "", content: "Here is some content for you"}
+  @blocked_attrs %{trigger_me: "", content: "Here is some content for you", name: "yandex"}
   @attrs_with_attachment %{trigger_me: "", content: "Here is some content for you", image: %Plug.Upload{path: "test/fixtures/sample.png", filename: "sample.png"}}
-  @form_attrs %{active: true, honeypot: "trigger_me", name: "some name", redirect_to: "http://google.com", to: "max@neuvians.io", reply_to: "max@neuvians.net", cc: nil, bcc: nil}
+  @form_attrs %{active: true, honeypot: "trigger_me", name: "some name", redirect_to: "http://google.com", to: "max@neuvians.io", reply_to: "max@neuvians.net", cc: "", bcc: "", black_list: "yandex"}
 
-  setup_all do 
+  setup_all do
     Mailman.TestServer.start
     :ok
   end
@@ -44,7 +44,7 @@ defmodule PhxFormRelay.SendControllerTest do
 
   test "logs the email body if the honeypot it triggered", %{conn: conn, form: form} do
     conn = post conn, "send/#{form.id}", @bot_attrs
-    assert Repo.one!(Email)
+    assert Repo.one!(assoc(form, :emails))
     assert redirected_to(conn) == form.redirect_to
   end
 
@@ -56,7 +56,7 @@ defmodule PhxFormRelay.SendControllerTest do
 
   test "it sends an email if the honeypot it empty", %{conn: conn, form: form} do
     Mailman.TestServer.clear_deliveries
-    post conn, "send/#{form.id}", @normal_attrs 
+    post conn, "send/#{form.id}", @normal_attrs
     :timer.sleep(100) # Allow for the Mail process to complete
     assert Mailman.TestServer.deliveries |> Enum.count == 1
   end
@@ -65,7 +65,7 @@ defmodule PhxFormRelay.SendControllerTest do
     Mailman.TestServer.clear_deliveries
     post conn, "send/#{form.id}", @normal_attrs
     :timer.sleep(100) # Allow for the Mail process to complete
-    email = Mailman.TestServer.deliveries |> List.first |> Mailman.Email.parse! 
+    email = Mailman.TestServer.deliveries |> List.first |> Mailman.Email.parse!
     assert email.reply_to == form.reply_to
   end
 
@@ -73,7 +73,7 @@ defmodule PhxFormRelay.SendControllerTest do
     Mailman.TestServer.clear_deliveries
     post(conn, "send/#{no_reply_to_form.id}", @normal_attrs)
     :timer.sleep(100) # Allow for the Mail process to complete
-    email = Mailman.TestServer.deliveries |> List.first |> Mailman.Email.parse! 
+    email = Mailman.TestServer.deliveries |> List.first |> Mailman.Email.parse!
     assert email.reply_to == Application.get_env(:phx_form_relay, :from_email)
   end
 
@@ -81,8 +81,14 @@ defmodule PhxFormRelay.SendControllerTest do
     Mailman.TestServer.clear_deliveries
     post(conn, "send/#{form.id}", @attrs_with_attachment)
     :timer.sleep(100) # Allow for the Mail process to complete
-    email = Mailman.TestServer.deliveries |> List.first |> Mailman.Email.parse! 
+    email = Mailman.TestServer.deliveries |> List.first |> Mailman.Email.parse!
     assert email.attachments |> length == 1
+  end
+
+  test "it checks a black list of words for matches in fields", %{conn: conn, form: form} do
+    conn = post conn, "send/#{form.id}", @blocked_attrs
+    assert Repo.get_by(Form, count: 1, id: form.id)
+    assert redirected_to(conn) == form.redirect_to
   end
 
 end

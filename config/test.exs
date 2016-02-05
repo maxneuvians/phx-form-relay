@@ -25,3 +25,6 @@ config :phx_form_relay, PhxFormRelay.Repo,
 # Configure Mailer
 config :phx_form_relay, 
   from_email: "test@test.com"
+
+config :comeonin, :bcrypt_log_rounds, 4
+config :comeonin, :pbkdf2_rounds, 1

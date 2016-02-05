@@ -24,13 +24,13 @@ defmodule PhxFormRelay.SessionController do
 
   def index(conn, _params) do
     conn
-      |> render "index.html", changeset: User.changeset(%User{})
+      |> render("index.html", changeset: User.changeset(%User{}))
   end
 
   defp sign_in(user, password, conn) when is_nil(user) do
     conn
       |> put_flash(:error, 'Could not find a user with that email.')
-      |> render "index.html", changeset: User.changeset(%User{})
+      |> render("index.html", changeset: User.changeset(%User{}))
   end
 
   defp sign_in(user, password, conn) when is_map(user) do
@@ -38,12 +38,13 @@ defmodule PhxFormRelay.SessionController do
       Comeonin.Bcrypt.checkpw(password, user.encrypted_password) ->
         conn
           |> put_session(:current_user, user.id)
-          |> put_flash(:info, 'You are now signed in.')
+          |> configure_session(renew: true)
+          |> put_flash(:info, "You are now signed in.")
           |> redirect(to: form_path(conn, :index))
       true ->
         conn
-          |> put_flash(:error, 'Email or password are incorrect.')
-          |> render "index.html", changeset: User.changeset(%User{})
+          |> put_flash(:error, "Email or password are incorrect.")
+          |> render("index.html", changeset: User.changeset(%User{}))
     end
   end
 end

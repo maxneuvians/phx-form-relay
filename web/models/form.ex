@@ -10,6 +10,7 @@ defmodule PhxFormRelay.Form do
     field :redirect_to, :string
     field :cc, :string
     field :bcc, :string
+    field :black_list
     field :reply_to, :string
     field :active, :boolean, default: false
     field :count, :integer, default: 0
@@ -20,7 +21,7 @@ defmodule PhxFormRelay.Form do
   end
 
   @required_fields ~w(active name to honeypot redirect_to count)
-  @optional_fields ~w(reply_to cc bcc)
+  @optional_fields ~w(reply_to cc bcc black_list)
 
   @doc """
   Creates a changeset based on the `model` and `params`.
